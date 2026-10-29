@@ -1,0 +1,360 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Expired Domain Finder App Config",
+  "type": "object",
+  "required": [
+    "dataDirectory",
+    "concurrency",
+    "cache",
+    "availability"
+  ],
+  "properties": {
+    "dataDirectory": {
+      "type": "string",
+      "description": "Base local data directory for runs, cache, artifacts, and logs."
+    },
+    "theme": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light",
+        "system"
+      ],
+      "default": "dark"
+    },
+    "display": {
+      "type": "object",
+      "properties": {
+        "tuiEnabledByDefault": {
+          "type": "boolean",
+          "default": true
+        },
+        "defaultOutputFormat": {
+          "type": "string",
+          "enum": [
+            "text",
+            "json"
+          ],
+          "default": "text"
+        },
+        "progressIntervalSeconds": {
+          "type": "integer",
+          "const": 10,
+          "default": 10
+        },
+        "logLevel": {
+          "type": "string",
+          "enum": [
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
+          "default": "info"
+        }
+      }
+    },
+    "concurrency": {
+      "type": "object",
+      "required": [
+        "cdx",
+        "warc",
+        "wat",
+        "graph",
+        "dns",
+        "rdap"
+      ],
+      "properties": {
+        "cdx": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 4
+        },
+        "warc": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256,
+          "default": 48
+        },
+        "wat": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64,
+          "default": 8
+        },
+        "graph": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32,
+          "default": 4
+        },
+        "dns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2000,
+          "default": 300
+        },
+        "rdap": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 20
+        },
+        "registrar": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 10
+        }
+      }
+    },
+    "cache": {
+      "type": "object",
+      "properties": {
+        "registeredTtlDays": {
+          "type": "integer",
+          "default": 14
+        },
+        "availableTtlHours": {
+          "type": "integer",
+          "default": 1
+        },
+        "likelyAvailableTtlHours": {
+          "type": "integer",
+          "default": 6
+        },
+        "ambiguousTtlHours": {
+          "type": "integer",
+          "default": 12
+        },
+        "unsupportedTldTtlDays": {
+          "type": "integer",
+          "default": 60
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "requestTimeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600,
+          "default": 60
+        },
+        "maxRetryAttempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20,
+          "default": 7
+        },
+        "initialRetryBackoffMillis": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 60000,
+          "default": 500
+        },
+        "maxRetryBackoffSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600,
+          "default": 60
+        },
+        "queueSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000,
+          "default": 10000
+        },
+        "sqliteBatchRows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000,
+          "default": 1000
+        },
+        "sqliteBatchMaxDelayMillis": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000,
+          "default": 2000
+        }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "properties": {
+        "dnsResolvers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "1.1.1.1",
+            "8.8.8.8"
+          ]
+        },
+        "registrarProvider": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": "porkbun"
+        },
+        "registrarApiKeyRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Reference to API key, currently env:VARIABLE_NAME or VARIABLE_NAME."
+        },
+        "registrarSecretKeyRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Reference to registrar secret key, currently env:VARIABLE_NAME or VARIABLE_NAME."
+        },
+        "registrarCheckStatuses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "available_likely",
+              "ambiguous",
+              "*"
+            ]
+          },
+          "default": [
+            "available_likely"
+          ],
+          "description": "Pre-registrar DNS/RDAP statuses that should be confirmed with the registrar. Leave restricted to likely-available candidates for long unattended runs."
+        },
+        "checkAllEligibleTlds": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, process all PSL-valid registrable domains except blocked or non-retail/restricted suffixes."
+        },
+        "blockedTlds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "blockedSuffixes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Registrable-domain suffixes to ignore, such as co.example or internal.test."
+        },
+        "blockedDomains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "restrictedTlds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "gov",
+            "mil",
+            "edu",
+            "int",
+            "arpa"
+          ],
+          "description": "Suffixes treated as non-retail or eligibility-restricted unless explicit provider policy says otherwise."
+        }
+      }
+    },
+    "commonCrawl": {
+      "type": "object",
+      "properties": {
+        "indexBaseUrl": {
+          "type": "string",
+          "default": "https://index.commoncrawl.org"
+        },
+        "dataBaseUrl": {
+          "type": "string",
+          "default": "https://data.commoncrawl.org"
+        },
+        "userAgent": {
+          "type": "string",
+          "default": "ExpiredDomainFinder/1.0"
+        },
+        "cdxPageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1000
+        },
+        "maxWarcRecordBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 8388608
+        },
+        "maxWarcDecodedBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 16777216
+        },
+        "maxWatObjectBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 2147483648
+        },
+        "maxGraphObjectBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 2147483648
+        },
+        "watBatchRows": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1000
+        },
+        "graphReleases": {
+          "type": "array",
+          "description": "Local graph release catalog mapping selected months or crawl IDs to Common Crawl graph vertex and edge object paths.",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "vertexPath",
+              "edgePath"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "months": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "crawlIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "vertexPath": {
+                "type": "string"
+              },
+              "edgePath": {
+                "type": "string"
+              }
+            }
+          },
+          "default": []
+        }
+      }
+    }
+  }
+}

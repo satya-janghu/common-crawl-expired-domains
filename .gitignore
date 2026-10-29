@@ -1,0 +1,24 @@
+# build output
+/edf
+/edf-gui
+/bin/
+/dist/
+/build/
+/.cache/
+*.tmp
+
+# local run data and artifacts
+/edf-data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.parquet
+*.parquet.tmp
+*.jsonl.zst
+/results*.csv
+
+# local env and OS files
+.env
+.env.*
+!.env.example
+.DS_Store
